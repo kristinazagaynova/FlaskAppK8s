@@ -1,5 +1,6 @@
 # FlaskAppK8s
-# Лабораторная работа №2 "Работа с Kubernetes"
+# Тестовое задание BIOCAD
+# Загайнова Кристина
 
 ## Задание:
 1.Создать веб приложение “hello world” на любом языке программирования, которое должно работать на порту 32777;
@@ -19,27 +20,47 @@
 - Docker Engine – для создания образа Docker и контейнеров
 - kuberctl – для запуска команд для кластеров Kubernetes
 - Minikube – для запуска Kubernetes на локальной машине
+- 
 ### Создание приложения
 Напишем простое веб-приложение, работающее на порту 32777 при помощи серверного фреймворка Flask, и проверим его работоспособность и доступность. 
-<br>![](./img/1.jpg)<br/>
+```
+from flask import Flask
+import os
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello():
+    return "Hello world!"
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 32777))
+    app.run(debug=True,host='0.0.0.0',port=port)
+```
+
+<br>![](./img/1.png)<br/>
 ### Создание образа
 Установим Docker и соберем контейнер с нашим приложением. Для этого напишем Dockerfile, в котором установим необходимые зависимости и пропишем команду для запуска. 
 
 ```
-FROM python:3.9
-RUN pip install flask
-COPY app.py /app
-CMD ["python", "app.py"]
+FROM python:3.6
+COPY . /app
+WORKDIR /app
+RUN pip install -r requirements.txt
+ENTRYPOINT ["python"]
+CMD ["myapp.py"]
 ```
-Опубликуем его на DockerHub.
-<br>![](./img/2.jpg)<br/>
+<br>![](./img/2.png)<br/>
+
+Опубликуем образ на <a href="https://hub.docker.com/repository/docker/kristinazagaynova/flask_hello_world/general" target="_blank">DockerHub</a> 
+<br>![](./img/3.png)<br/>
 
 ### Работа с minikube
 
 Создадим кластер minikube
 
 > minikube start
-<br>![](./img/3.jpg)<br/>
+<br>![](./img/4.png)<br/>
 
 Создадим YAML-файл, в котором опишем Deployment – ресурс Kubernetes, предназначенный для развертывания приложений и их обновления декларативным образом. 
 
@@ -61,7 +82,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: kristinazagaynova/myflaskapp
+        image: kristinazagaynova/flask_hello_world
         ports:
         - containerPort: 32777
 
@@ -80,18 +101,17 @@ spec:
 
 apiVersion: v1
 kind: Service
-metadata: 
+metadata:
   name: app-service
 spec:
-  selector:   
-    app: app
-  type: NodePort
-  ports: 
-    - name: http
+  ports:
+    - name: app-port
       protocol: TCP
       port: 32777
       targetPort: 32777
-      nodePort: 30036
+  selector:
+    app: app
+  type: NodePort
 
 ```
 
@@ -104,9 +124,11 @@ spec:
 ### Проверка работоспособности
 
 Запустим сервис.
+Посмотрим список запущенных подов
+<br>![](./img/7.png)<br/>
 
-> minikube service weatherapp-service
-<br>![](./img/3.jpg)<br/>
+> minikube service app-service
+<br>![](./img/5.png)<br/>
 
-Откроем браузер. Ура, все работает!
-<br>![](./img/4.gif)<br/>
+Проверим работоспособность.
+<br>![](./img/6.png)<br/>
