@@ -20,7 +20,6 @@
 - Docker Engine – для создания образа Docker и контейнеров
 - kuberctl – для запуска команд для кластеров Kubernetes
 - Minikube – для запуска Kubernetes на локальной машине
-- 
 ### Создание приложения
 Напишем простое веб-приложение, работающее на порту 32777 при помощи серверного фреймворка Flask, и проверим его работоспособность и доступность. 
 ```
@@ -37,11 +36,9 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 32777))
     app.run(debug=True,host='0.0.0.0',port=port)
 ```
-
 <br>![](./img/1.png)<br/>
 ### Создание образа
 Установим Docker и соберем контейнер с нашим приложением. Для этого напишем Dockerfile, в котором установим необходимые зависимости и пропишем команду для запуска. 
-
 ```
 FROM python:3.6
 COPY . /app
@@ -51,14 +48,12 @@ ENTRYPOINT ["python"]
 CMD ["myapp.py"]
 ```
 <br>![](./img/2.png)<br/>
-
 Опубликуем образ на <a href="https://hub.docker.com/repository/docker/kristinazagaynova/flask_hello_world/general" target="_blank">DockerHub</a> 
 <br>![](./img/3.png)<br/>
 
 ### Работа с minikube
 
 Создадим кластер minikube
-
 > minikube start
 <br>![](./img/4.png)<br/>
 
@@ -90,9 +85,7 @@ spec:
 ```
 
 В кофигурационном файле мы задали количество реплик (2 штуки) и метки для подов, соответствующих шаблону.
-
 Применим конфигурационный файл развертывания:
-
 > kubectl apply -f deployment.yaml
 
 По умолчанию под доступен только при обращении по его внутреннему IP-адресу внутри кластера Kubernetes. Чтобы сделать контейнер доступным вне виртуальной сети Kubernetes, необходимо представить под как Service Kubernetes. Создадим YAML-файл, в котором его опишем
